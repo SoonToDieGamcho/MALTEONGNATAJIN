@@ -98,6 +98,15 @@
       color: white;
       border-radius: 6px;
     }
+
+    /* 숨겨진 트리거 이미지 */
+    #secretTrigger {
+      position: fixed;
+      bottom: 5px;
+      right: 5px;
+      width: 65px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -143,6 +152,9 @@
   <button onclick="downloadImage()">이미지 저장하기</button>
   <button onclick="randomizeParts()">랜덤 돌리기</button>
 
+  <!-- 숨겨진 트리거 이미지 -->
+  <img id="secretTrigger" src="img/easter.png" alt="easter egg" onclick="triggerSecretSep()">
+
   <script>
     const parts = {
       js: ['img/js/1텅.png', 'img/js/1안.png', 'img/js/1아.png'],
@@ -181,7 +193,7 @@
     function changePart(part, delta) {
       indexes[part] = (indexes[part] + delta + parts[part].length) % parts[part].length;
       document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
-      isWeirdMode = false; // 수동 변경 시 이스터에그 해제
+      isWeirdMode = false;
       updateCode();
     }
 
@@ -223,7 +235,6 @@
 
       if (isWeirdMode) {
         for (const part in weirdParts) {
-          indexes[part] = 0;
           document.getElementById(part + 'Layer').src = weirdParts[part][0];
         }
       } else {
@@ -234,6 +245,19 @@
         }
       }
 
+      updateCode();
+    }
+
+    function triggerSecretSep() {
+      const secretSepImage = 'img/sep/1슈.png';
+      document.getElementById('sepLayer').src = secretSepImage;
+
+      const foundIndex = parts.sep.indexOf(secretSepImage);
+      if (foundIndex !== -1) {
+        indexes.sep = foundIndex;
+      }
+
+      isWeirdMode = false;
       updateCode();
     }
 
@@ -299,10 +323,8 @@
               ctx.lineWidth = 6;
               ctx.strokeStyle = 'black';
               ctx.strokeText(char, 250 + offsetX, 475);
-
               ctx.fillStyle = color;
               ctx.fillText(char, 250 + offsetX, 475);
-
               offsetX += 62;
             }
 
