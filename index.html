@@ -152,6 +152,14 @@
       key: ['img/key/1화.png', 'img/key/1출.png', 'img/key/1진.png', 'img/key/1파.png', 'img/key/1침.png', 'img/key/3호.png', 'img/key/1충.png']
     };
 
+    const weirdParts = {
+      js: ['img/weird/js/1없.png'],
+      sep: ['img/weird/sep/2없.png'],
+      sins: ['img/weird/sins/3없.png'],
+      att: ['img/weird/att/4없.png'],
+      key: ['img/weird/key/5없.png']
+    };
+
     const indexes = {
       js: 0,
       sep: 0,
@@ -160,26 +168,39 @@
       key: 2
     };
 
+    let randomCount = 0;
+    let isWeirdMode = false;
+
     const rainbowColors = ['red', 'orange', 'yellow', 'green', 'blue'];
 
     function getCharFromFilename(filename) {
-      return filename[filename.lastIndexOf('/') + 2]; // '1텅.png'에서 '텅'
+      const name = filename.split('/').pop().replace(/\d+/, '').replace('.png', '');
+      return name;
     }
 
     function changePart(part, delta) {
       indexes[part] = (indexes[part] + delta + parts[part].length) % parts[part].length;
       document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
+      isWeirdMode = false; // 수동 변경 시 이스터에그 해제
       updateCode();
     }
 
     function updateCode() {
-      const chars = [
-        getCharFromFilename(parts.sep[indexes.sep]),
-        getCharFromFilename(parts.js[indexes.js]),
-        getCharFromFilename(parts.sins[indexes.sins]),
-        getCharFromFilename(parts.att[indexes.att]),
-        getCharFromFilename(parts.key[indexes.key])
-      ];
+      const chars = isWeirdMode
+        ? [
+            getCharFromFilename(weirdParts.sep[0]),
+            getCharFromFilename(weirdParts.js[0]),
+            getCharFromFilename(weirdParts.sins[0]),
+            getCharFromFilename(weirdParts.att[0]),
+            getCharFromFilename(weirdParts.key[0])
+          ]
+        : [
+            getCharFromFilename(parts.sep[indexes.sep]),
+            getCharFromFilename(parts.js[indexes.js]),
+            getCharFromFilename(parts.sins[indexes.sins]),
+            getCharFromFilename(parts.att[indexes.att]),
+            getCharFromFilename(parts.key[indexes.key])
+          ];
 
       let html = '';
       for (let i = 0; i < chars.length; i++) {
@@ -196,27 +217,63 @@
       document.getElementById('codeDisplay').innerHTML = html;
     }
 
+    function randomizeParts() {
+      randomCount++;
+      isWeirdMode = (randomCount % 10 === 0);
+
+      if (isWeirdMode) {
+        for (const part in weirdParts) {
+          indexes[part] = 0;
+          document.getElementById(part + 'Layer').src = weirdParts[part][0];
+        }
+      } else {
+        for (const part in parts) {
+          const max = parts[part].length;
+          indexes[part] = Math.floor(Math.random() * max);
+          document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
+        }
+      }
+
+      updateCode();
+    }
+
     function downloadImage() {
       const canvas = document.createElement('canvas');
       canvas.width = 500;
       canvas.height = 500;
       const ctx = canvas.getContext('2d');
 
-      const layers = [
-        parts.js[indexes.js],
-        parts.sep[indexes.sep],
-        parts.sins[indexes.sins],
-        parts.att[indexes.att],
-        parts.key[indexes.key]
-      ];
+      const layers = isWeirdMode
+        ? [
+            weirdParts.js[0],
+            weirdParts.sep[0],
+            weirdParts.sins[0],
+            weirdParts.att[0],
+            weirdParts.key[0]
+          ]
+        : [
+            parts.js[indexes.js],
+            parts.sep[indexes.sep],
+            parts.sins[indexes.sins],
+            parts.att[indexes.att],
+            parts.key[indexes.key]
+          ];
 
-      const chars = [
-        getCharFromFilename(parts.sep[indexes.sep]),
-        getCharFromFilename(parts.js[indexes.js]),
-        getCharFromFilename(parts.sins[indexes.sins]),
-        getCharFromFilename(parts.att[indexes.att]),
-        getCharFromFilename(parts.key[indexes.key])
-      ];
+      const chars = isWeirdMode
+        ? [
+            getCharFromFilename(weirdParts.sep[0]),
+            getCharFromFilename(weirdParts.js[0]),
+            getCharFromFilename(weirdParts.sins[0]),
+            getCharFromFilename(weirdParts.att[0]),
+            getCharFromFilename(weirdParts.key[0])
+          ]
+        : [
+            getCharFromFilename(parts.sep[indexes.sep]),
+            getCharFromFilename(parts.js[indexes.js]),
+            getCharFromFilename(parts.sins[indexes.sins]),
+            getCharFromFilename(parts.att[indexes.att]),
+            getCharFromFilename(parts.key[indexes.key])
+          ];
 
       let loaded = 0;
       const images = [];
@@ -239,12 +296,12 @@
               const char = chars[i];
               const color = rainbowColors[i % rainbowColors.length];
 
-              ctx.lineWidth = 6; // 윤곽선 두께
+              ctx.lineWidth = 6;
               ctx.strokeStyle = 'black';
-              ctx.strokeText(char, 250 + offsetX, 475); // 검정 테두리
+              ctx.strokeText(char, 250 + offsetX, 475);
 
               ctx.fillStyle = color;
-              ctx.fillText(char, 250 + offsetX, 475); // 컬러 텍스트
+              ctx.fillText(char, 250 + offsetX, 475);
 
               offsetX += 62;
             }
@@ -256,15 +313,6 @@
           }
         };
       });
-    }
-
-    function randomizeParts() {
-      for (const part in parts) {
-        const max = parts[part].length;
-        indexes[part] = Math.floor(Math.random() * max);
-        document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
-      }
-      updateCode();
     }
 
     window.onload = () => {
