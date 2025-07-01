@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>말텅나타진 생성기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f9f9f9;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .preview {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      margin: 0 auto 20px auto;
+      border: 2px solid #ccc;
+      background: #eee;
+    }
+
+    .layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .text-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .text-pair {
+      position: relative;
+      display: inline-block;
+      font-size: 70px;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .text-shadow {
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: black;
+      z-index: 0;
+      text-shadow: 
+        -3px -3px 0 black,
+         3px -3px 0 black,
+        -3px  3px 0 black,
+         3px  3px 0 black,
+         0px -3px 0 black,
+         0px  3px 0 black,
+        -3px  0px 0 black,
+         3px  0px 0 black;
+    }
+
+    .text-top {
+      position: relative;
+      z-index: 1;
+    }
+
+    .control-group {
+      margin: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .arrow-button {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      background: #333;
+      color: white;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>나만의 평균 만들기</h1>
+
+  <div class="preview">
+    <img id="jsLayer" class="layer">
+    <img id="sepLayer" class="layer">
+    <img id="sinsLayer" class="layer">
+    <img id="attLayer" class="layer">
+    <img id="keyLayer" class="layer">
+    <div id="codeDisplay" class="text-overlay"></div>
+  </div>
+
+  <!-- 컨트롤 -->
+  <div class="control-group">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sep', -1)">
+    <span><strong>세피라</strong></span>
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('sep', 1)">
+  </div>
+  <div class="control-group">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('js', -1)">
+    <span><strong>정실</strong></span>
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('js', 1)">
+  </div>
+  <div class="control-group">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sins', -1)">
+    <span><strong>죄악</strong></span>
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('sins', 1)">
+  </div>
+  <div class="control-group">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('att', -1)">
+    <span><strong>공격속성</strong></span>
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('att', 1)">
+  </div>
+  <div class="control-group">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('key', -1)">
+    <span><strong>키워드</strong></span>
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('key', 1)">
+  </div>
+
+  <button onclick="downloadImage()">이미지 저장하기</button>
+  <button onclick="randomizeParts()">랜덤 돌리기</button>
+
+  <script>
+    const parts = {
+      js: ['img/js/1텅.png', 'img/js/1안.png', 'img/js/1아.png'],
+      sep: ['img/sep/1말.png', 'img/sep/1예.png', 'img/sep/1호.png', 'img/sep/1네.png', 'img/sep/1티.png', 'img/sep/1헤.png', 'img/sep/1게.png', 'img/sep/1비.png', 'img/sep/2호.png'],
+      sins: ['img/sins/1분.png', 'img/sins/1색.png', 'img/sins/1나.png', 'img/sins/1탐.png', 'img/sins/1우.png', 'img/sins/1오.png', 'img/sins/1질.png'],
+      att: ['img/att/1참.png', 'img/att/1관.png', 'img/att/1타.png'],
+      key: ['img/key/1화.png', 'img/key/1출.png', 'img/key/1진.png', 'img/key/1파.png', 'img/key/1침.png', 'img/key/3호.png', 'img/key/1충.png']
+    };
+
+    const indexes = {
+      js: 0,
+      sep: 0,
+      sins: 2,
+      att: 2,
+      key: 2
+    };
+
+    const rainbowColors = ['red', 'orange', 'yellow', 'green', 'blue'];
+
+    function getCharFromFilename(filename) {
+      return filename[filename.lastIndexOf('/') + 2]; // '1텅.png'에서 '텅'
+    }
+
+    function changePart(part, delta) {
+      indexes[part] = (indexes[part] + delta + parts[part].length) % parts[part].length;
+      document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
+      updateCode();
+    }
+
+    function updateCode() {
+      const chars = [
+        getCharFromFilename(parts.sep[indexes.sep]),
+        getCharFromFilename(parts.js[indexes.js]),
+        getCharFromFilename(parts.sins[indexes.sins]),
+        getCharFromFilename(parts.att[indexes.att]),
+        getCharFromFilename(parts.key[indexes.key])
+      ];
+
+      let html = '';
+      for (let i = 0; i < chars.length; i++) {
+        const color = rainbowColors[i % rainbowColors.length];
+        const char = chars[i];
+        html += `
+          <span class="text-pair">
+            <span class="text-shadow">${char}</span>
+            <span class="text-top" style="color:${color}">${char}</span>
+          </span>
+        `;
+      }
+
+      document.getElementById('codeDisplay').innerHTML = html;
+    }
+
+    function downloadImage() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 500;
+      canvas.height = 500;
+      const ctx = canvas.getContext('2d');
+
+      const layers = [
+        parts.js[indexes.js],
+        parts.sep[indexes.sep],
+        parts.sins[indexes.sins],
+        parts.att[indexes.att],
+        parts.key[indexes.key]
+      ];
+
+      const chars = [
+        getCharFromFilename(parts.sep[indexes.sep]),
+        getCharFromFilename(parts.js[indexes.js]),
+        getCharFromFilename(parts.sins[indexes.sins]),
+        getCharFromFilename(parts.att[indexes.att]),
+        getCharFromFilename(parts.key[indexes.key])
+      ];
+
+      let loaded = 0;
+      const images = [];
+
+      layers.forEach((src, i) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          images[i] = img;
+          loaded++;
+          if (loaded === layers.length) {
+            images.forEach(image => ctx.drawImage(image, 0, 0, 500, 500));
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.font = '70px Orbitron';
+            let offsetX = -75;
+
+            for (let i = 0; i < chars.length; i++) {
+              const char = chars[i];
+              const color = rainbowColors[i % rainbowColors.length];
+
+              ctx.lineWidth = 6; // 윤곽선 두께
+              ctx.strokeStyle = 'black';
+              ctx.strokeText(char, 250 + offsetX, 475); // 검정 테두리
+
+              ctx.fillStyle = color;
+              ctx.fillText(char, 250 + offsetX, 475); // 컬러 텍스트
+
+              offsetX += 35;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'profile.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          }
+        };
+      });
+    }
+
+    function randomizeParts() {
+      for (const part in parts) {
+        const max = parts[part].length;
+        indexes[part] = Math.floor(Math.random() * max);
+        document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
+      }
+      updateCode();
+    }
+
+    window.onload = () => {
+      for (const part in parts) {
+        document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
+      }
+      updateCode();
+    };
+  </script>
+</body>
+</html>
