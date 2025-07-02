@@ -232,6 +232,7 @@
     let randomCount = 0;
     let isWeirdMode = false;
     let isSecretSep = false;
+    let isRolandMode = false;
 
     const rainbowColors = ['red', 'orange', 'yellow', 'green', 'blue'];
 
@@ -249,6 +250,7 @@
       document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
       isWeirdMode = false;
       isSecretSep = false;
+      isRolandMode = false;
       updateCode();
     }
 
@@ -263,7 +265,7 @@
           ]
         : [
             isSecretSep ? '슈' : getCharFromFilename(parts.sep[indexes.sep]),
-            getCharFromFilename(parts.js[indexes.js]),
+            isRolandMode ? '롤' : getCharFromFilename(parts.js[indexes.js]),
             getCharFromFilename(parts.sins[indexes.sins]),
             getCharFromFilename(parts.att[indexes.att]),
             getCharFromFilename(parts.key[indexes.key]),
@@ -288,6 +290,7 @@
       randomCount++;
       isWeirdMode = randomCount % 10 === 0;
       isSecretSep = false;
+      isRolandMode = false;
 
       if (isWeirdMode) {
         for (const part in weirdParts) {
@@ -395,6 +398,10 @@
       plopAudio.currentTime = 0;
       plopAudio.play().catch(() => {});
 
+
+       isRolandMode = true;
+       document.getElementById('jsLayer').src = 'img/roland2.png';
+
       for (let i = 0; i < 5; i++) {
         setTimeout(() => {
           const img = document.createElement('img');
@@ -417,6 +424,8 @@
           }, 2800);
         }, i * 200);
       }
+
+       updateCode();
     }
 
     window.onload = () => {
