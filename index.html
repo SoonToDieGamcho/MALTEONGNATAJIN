@@ -1,3 +1,4 @@
+<!-- 중간 생략 없이 전체 HTML -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -11,11 +12,7 @@
       background: #f9f9f9;
       padding: 30px;
     }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
+    h1 { margin-bottom: 20px; }
     .preview {
       position: relative;
       width: 500px;
@@ -24,7 +21,6 @@
       border: 2px solid #ccc;
       background: #eee;
     }
-
     .layer {
       position: absolute;
       top: 0;
@@ -33,7 +29,6 @@
       height: 100%;
       object-fit: contain;
     }
-
     .text-overlay {
       position: absolute;
       bottom: 20px;
@@ -43,7 +38,6 @@
       pointer-events: none;
       white-space: nowrap;
     }
-
     .text-pair {
       position: relative;
       display: inline-block;
@@ -51,7 +45,6 @@
       font-weight: 700;
       font-family: 'Orbitron', sans-serif;
     }
-
     .text-shadow {
       position: absolute;
       left: 0;
@@ -68,12 +61,10 @@
         -3px  0px 0 black,
          3px  0px 0 black;
     }
-
     .text-top {
       position: relative;
       z-index: 1;
     }
-
     .control-group {
       margin: 10px;
       display: flex;
@@ -81,13 +72,11 @@
       align-items: center;
       gap: 10px;
     }
-
     .arrow-button {
       width: 40px;
       height: 40px;
       cursor: pointer;
     }
-
     button {
       margin-top: 10px;
       padding: 10px 20px;
@@ -98,8 +87,6 @@
       color: white;
       border-radius: 6px;
     }
-
-    /* 숨겨진 트리거 이미지 */
     #secretTrigger {
       position: fixed;
       bottom: 5px;
@@ -122,7 +109,6 @@
     <div id="codeDisplay" class="text-overlay"></div>
   </div>
 
-  <!-- 컨트롤 -->
   <div class="control-group">
     <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sep', -1)">
     <span><strong>세피라</strong></span>
@@ -152,7 +138,6 @@
   <button onclick="downloadImage()">이미지 저장하기</button>
   <button onclick="randomizeParts()">랜덤 돌리기</button>
 
-  <!-- 숨겨진 트리거 이미지 -->
   <img id="secretTrigger" src="img/easter.png" alt="easter egg" onclick="triggerSecretSep()">
 
   <script>
@@ -164,14 +149,6 @@
       key: ['img/key/1화.png', 'img/key/1출.png', 'img/key/1진.png', 'img/key/1파.png', 'img/key/1침.png', 'img/key/3호.png', 'img/key/1충.png']
     };
 
-    const weirdParts = {
-      js: ['img/weird/js/1없.png'],
-      sep: ['img/weird/sep/2없.png'],
-      sins: ['img/weird/sins/3없.png'],
-      att: ['img/weird/att/4없.png'],
-      key: ['img/weird/key/5없.png']
-    };
-
     const indexes = {
       js: 0,
       sep: 0,
@@ -180,84 +157,55 @@
       key: 2
     };
 
-    let randomCount = 0;
-    let isWeirdMode = false;
-
     const rainbowColors = ['red', 'orange', 'yellow', 'green', 'blue'];
+    let isSecretMode = false;
 
     function getCharFromFilename(filename) {
-      const name = filename.split('/').pop().replace(/\d+/, '').replace('.png', '');
-      return name;
+      return filename.split('/').pop().replace(/\d+/, '').replace('.png', '');
     }
 
     function changePart(part, delta) {
       indexes[part] = (indexes[part] + delta + parts[part].length) % parts[part].length;
       document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
-      isWeirdMode = false;
+      isSecretMode = false;
       updateCode();
     }
 
     function updateCode() {
-      const chars = isWeirdMode
-        ? [
-            getCharFromFilename(weirdParts.sep[0]),
-            getCharFromFilename(weirdParts.js[0]),
-            getCharFromFilename(weirdParts.sins[0]),
-            getCharFromFilename(weirdParts.att[0]),
-            getCharFromFilename(weirdParts.key[0])
-          ]
-        : [
-            getCharFromFilename(parts.sep[indexes.sep]),
-            getCharFromFilename(parts.js[indexes.js]),
-            getCharFromFilename(parts.sins[indexes.sins]),
-            getCharFromFilename(parts.att[indexes.att]),
-            getCharFromFilename(parts.key[indexes.key])
-          ];
+      const chars = [
+        isSecretMode ? '슈' : getCharFromFilename(parts.sep[indexes.sep]),
+        getCharFromFilename(parts.js[indexes.js]),
+        getCharFromFilename(parts.sins[indexes.sins]),
+        getCharFromFilename(parts.att[indexes.att]),
+        getCharFromFilename(parts.key[indexes.key])
+      ];
 
       let html = '';
       for (let i = 0; i < chars.length; i++) {
         const color = rainbowColors[i % rainbowColors.length];
-        const char = chars[i];
         html += `
           <span class="text-pair">
-            <span class="text-shadow">${char}</span>
-            <span class="text-top" style="color:${color}">${char}</span>
+            <span class="text-shadow">${chars[i]}</span>
+            <span class="text-top" style="color:${color}">${chars[i]}</span>
           </span>
         `;
       }
-
       document.getElementById('codeDisplay').innerHTML = html;
     }
 
-    function randomizeParts() {
-      randomCount++;
-      isWeirdMode = (randomCount % 10 === 0);
-
-      if (isWeirdMode) {
-        for (const part in weirdParts) {
-          document.getElementById(part + 'Layer').src = weirdParts[part][0];
-        }
-      } else {
-        for (const part in parts) {
-          const max = parts[part].length;
-          indexes[part] = Math.floor(Math.random() * max);
-          document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
-        }
-      }
-
+    function triggerSecretSep() {
+      isSecretMode = true;
+      document.getElementById('sepLayer').src = 'img/sep/1슈.png';
       updateCode();
     }
 
-    function triggerSecretSep() {
-      const secretSepImage = 'img/sep/1슈.png';
-      document.getElementById('sepLayer').src = secretSepImage;
-
-      const foundIndex = parts.sep.indexOf(secretSepImage);
-      if (foundIndex !== -1) {
-        indexes.sep = foundIndex;
+    function randomizeParts() {
+      isSecretMode = false;
+      for (const part in parts) {
+        const max = parts[part].length;
+        indexes[part] = Math.floor(Math.random() * max);
+        document.getElementById(part + 'Layer').src = parts[part][indexes[part]];
       }
-
-      isWeirdMode = false;
       updateCode();
     }
 
@@ -267,49 +215,33 @@
       canvas.height = 500;
       const ctx = canvas.getContext('2d');
 
-      const layers = isWeirdMode
-        ? [
-            weirdParts.js[0],
-            weirdParts.sep[0],
-            weirdParts.sins[0],
-            weirdParts.att[0],
-            weirdParts.key[0]
-          ]
-        : [
-            parts.js[indexes.js],
-            parts.sep[indexes.sep],
-            parts.sins[indexes.sins],
-            parts.att[indexes.att],
-            parts.key[indexes.key]
-          ];
+      const layerImages = [
+        parts.js[indexes.js],
+        isSecretMode ? 'img/sep/1슈.png' : parts.sep[indexes.sep],
+        parts.sins[indexes.sins],
+        parts.att[indexes.att],
+        parts.key[indexes.key]
+      ];
 
-      const chars = isWeirdMode
-        ? [
-            getCharFromFilename(weirdParts.sep[0]),
-            getCharFromFilename(weirdParts.js[0]),
-            getCharFromFilename(weirdParts.sins[0]),
-            getCharFromFilename(weirdParts.att[0]),
-            getCharFromFilename(weirdParts.key[0])
-          ]
-        : [
-            getCharFromFilename(parts.sep[indexes.sep]),
-            getCharFromFilename(parts.js[indexes.js]),
-            getCharFromFilename(parts.sins[indexes.sins]),
-            getCharFromFilename(parts.att[indexes.att]),
-            getCharFromFilename(parts.key[indexes.key])
-          ];
+      const chars = [
+        isSecretMode ? '슈' : getCharFromFilename(parts.sep[indexes.sep]),
+        getCharFromFilename(parts.js[indexes.js]),
+        getCharFromFilename(parts.sins[indexes.sins]),
+        getCharFromFilename(parts.att[indexes.att]),
+        getCharFromFilename(parts.key[indexes.key])
+      ];
 
       let loaded = 0;
       const images = [];
 
-      layers.forEach((src, i) => {
+      layerImages.forEach((src, i) => {
         const img = new Image();
         img.src = src;
         img.onload = () => {
           images[i] = img;
           loaded++;
-          if (loaded === layers.length) {
-            images.forEach(image => ctx.drawImage(image, 0, 0, 500, 500));
+          if (loaded === layerImages.length) {
+            images.forEach(img => ctx.drawImage(img, 0, 0, 500, 500));
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
@@ -317,14 +249,12 @@
             let offsetX = -123;
 
             for (let i = 0; i < chars.length; i++) {
-              const char = chars[i];
               const color = rainbowColors[i % rainbowColors.length];
-
               ctx.lineWidth = 6;
               ctx.strokeStyle = 'black';
-              ctx.strokeText(char, 250 + offsetX, 475);
+              ctx.strokeText(chars[i], 250 + offsetX, 475);
               ctx.fillStyle = color;
-              ctx.fillText(char, 250 + offsetX, 475);
+              ctx.fillText(chars[i], 250 + offsetX, 475);
               offsetX += 62;
             }
 
