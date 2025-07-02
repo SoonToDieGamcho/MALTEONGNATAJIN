@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>말텅나타진 생성기</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: sans-serif;
@@ -99,12 +99,29 @@
       border-radius: 6px;
     }
 
+    /* 숨겨진 트리거 이미지 */
     #secretTrigger {
       position: fixed;
       bottom: 5px;
       right: 5px;
       width: 65px;
       cursor: pointer;
+    }
+    #secretTrigger2 {
+      position: fixed;
+      bottom: 5px;
+      left: 5px;
+      width: 60px;
+      cursor: pointer;
+    }
+
+    /* 롤랑 낙하 이미지 스타일 */
+    .falling-roland {
+      position: fixed;
+      width: 130px; /* 크기 변경 */
+      z-index: 9999;
+      transition: transform 2.5s linear;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -113,52 +130,87 @@
   <h1>나만의 롭평 만들기</h1>
 
   <div class="preview">
-    <img id="jsLayer" class="layer">
-    <img id="sepLayer" class="layer">
-    <img id="sinsLayer" class="layer">
-    <img id="attLayer" class="layer">
-    <img id="keyLayer" class="layer">
+    <img id="jsLayer" class="layer" />
+    <img id="sepLayer" class="layer" />
+    <img id="sinsLayer" class="layer" />
+    <img id="attLayer" class="layer" />
+    <img id="keyLayer" class="layer" />
     <div id="codeDisplay" class="text-overlay"></div>
   </div>
 
   <div class="control-group">
-    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sep', -1)">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sep', -1)" />
     <span><strong>세피라</strong></span>
-    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('sep', 1)">
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('sep', 1)" />
   </div>
   <div class="control-group">
-    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('js', -1)">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('js', -1)" />
     <span><strong>정실</strong></span>
-    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('js', 1)">
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('js', 1)" />
   </div>
   <div class="control-group">
-    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sins', -1)">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('sins', -1)" />
     <span><strong>죄악</strong></span>
-    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('sins', 1)">
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('sins', 1)" />
   </div>
   <div class="control-group">
-    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('att', -1)">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('att', -1)" />
     <span><strong>공격속성</strong></span>
-    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('att', 1)">
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('att', 1)" />
   </div>
   <div class="control-group">
-    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('key', -1)">
+    <img src="img/left-arrow.png" class="arrow-button" onclick="changePart('key', -1)" />
     <span><strong>키워드</strong></span>
-    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('key', 1)">
+    <img src="img/right-arrow.png" class="arrow-button" onclick="changePart('key', 1)" />
   </div>
 
   <button onclick="downloadImage()">이미지 저장하기</button>
   <button onclick="randomizeParts()">랜덤 돌리기</button>
 
-  <img id="secretTrigger" src="img/easter.png" alt="easter egg" onclick="triggerSecretSep()">
+  <!-- 숨겨진 트리거 이미지 -->
+  <img id="secretTrigger" src="img/easter.png" alt="easter egg" onclick="triggerSecretSep()" />
+  <img
+    id="secretTrigger2"
+    src="img/easter2.png"
+    alt="easter egg 2"
+    onclick="triggerFallingRoland()"
+  />
+
+  <audio id="plopSound" src="sfx/plop.mp3" preload="auto"></audio>
 
   <script>
     const parts = {
       js: ['img/js/1텅.png', 'img/js/1안.png', 'img/js/1아.png'],
-      sep: ['img/sep/1말.png', 'img/sep/1예.png', 'img/sep/1호.png', 'img/sep/1네.png', 'img/sep/1티.png', 'img/sep/1헤.png', 'img/sep/1게.png', 'img/sep/1비.png', 'img/sep/2호.png'],
-      sins: ['img/sins/1분.png', 'img/sins/1색.png', 'img/sins/1나.png', 'img/sins/1탐.png', 'img/sins/1우.png', 'img/sins/1오.png', 'img/sins/1질.png'],
+      sep: [
+        'img/sep/1말.png',
+        'img/sep/1예.png',
+        'img/sep/1호.png',
+        'img/sep/1네.png',
+        'img/sep/1티.png',
+        'img/sep/1헤.png',
+        'img/sep/1게.png',
+        'img/sep/1비.png',
+        'img/sep/2호.png',
+      ],
+      sins: [
+        'img/sins/1분.png',
+        'img/sins/1색.png',
+        'img/sins/1나.png',
+        'img/sins/1탐.png',
+        'img/sins/1우.png',
+        'img/sins/1오.png',
+        'img/sins/1질.png',
+      ],
       att: ['img/att/1참.png', 'img/att/1관.png', 'img/att/1타.png'],
-      key: ['img/key/1화.png', 'img/key/1출.png', 'img/key/1진.png', 'img/key/1파.png', 'img/key/1침.png', 'img/key/3호.png', 'img/key/1충.png']
+      key: [
+        'img/key/1화.png',
+        'img/key/1출.png',
+        'img/key/1진.png',
+        'img/key/1파.png',
+        'img/key/1침.png',
+        'img/key/3호.png',
+        'img/key/1충.png',
+      ],
     };
 
     const weirdParts = {
@@ -166,7 +218,7 @@
       sep: ['img/weird/sep/2없.png'],
       sins: ['img/weird/sins/3없.png'],
       att: ['img/weird/att/4없.png'],
-      key: ['img/weird/key/5없.png']
+      key: ['img/weird/key/5없.png'],
     };
 
     const indexes = {
@@ -174,7 +226,7 @@
       sep: 0,
       sins: 2,
       att: 2,
-      key: 2
+      key: 2,
     };
 
     let randomCount = 0;
@@ -184,7 +236,11 @@
     const rainbowColors = ['red', 'orange', 'yellow', 'green', 'blue'];
 
     function getCharFromFilename(filename) {
-      const name = filename.split('/').pop().replace(/\d+/, '').replace('.png', '');
+      const name = filename
+        .split('/')
+        .pop()
+        .replace(/\d+/, '')
+        .replace('.png', '');
       return name;
     }
 
@@ -203,14 +259,14 @@
             getCharFromFilename(weirdParts.js[0]),
             getCharFromFilename(weirdParts.sins[0]),
             getCharFromFilename(weirdParts.att[0]),
-            getCharFromFilename(weirdParts.key[0])
+            getCharFromFilename(weirdParts.key[0]),
           ]
         : [
             isSecretSep ? '슈' : getCharFromFilename(parts.sep[indexes.sep]),
             getCharFromFilename(parts.js[indexes.js]),
             getCharFromFilename(parts.sins[indexes.sins]),
             getCharFromFilename(parts.att[indexes.att]),
-            getCharFromFilename(parts.key[indexes.key])
+            getCharFromFilename(parts.key[indexes.key]),
           ];
 
       let html = '';
@@ -230,7 +286,7 @@
 
     function randomizeParts() {
       randomCount++;
-      isWeirdMode = (randomCount % 10 === 0);
+      isWeirdMode = randomCount % 10 === 0;
       isSecretSep = false;
 
       if (isWeirdMode) {
@@ -267,14 +323,14 @@
             weirdParts.sep[0],
             weirdParts.sins[0],
             weirdParts.att[0],
-            weirdParts.key[0]
+            weirdParts.key[0],
           ]
         : [
             parts.js[indexes.js],
             isSecretSep ? 'img/sep/1슈.png' : parts.sep[indexes.sep],
             parts.sins[indexes.sins],
             parts.att[indexes.att],
-            parts.key[indexes.key]
+            parts.key[indexes.key],
           ];
 
       const chars = isWeirdMode
@@ -283,14 +339,14 @@
             getCharFromFilename(weirdParts.js[0]),
             getCharFromFilename(weirdParts.sins[0]),
             getCharFromFilename(weirdParts.att[0]),
-            getCharFromFilename(weirdParts.key[0])
+            getCharFromFilename(weirdParts.key[0]),
           ]
         : [
             isSecretSep ? '슈' : getCharFromFilename(parts.sep[indexes.sep]),
             getCharFromFilename(parts.js[indexes.js]),
             getCharFromFilename(parts.sins[indexes.sins]),
             getCharFromFilename(parts.att[indexes.att]),
-            getCharFromFilename(parts.key[indexes.key])
+            getCharFromFilename(parts.key[indexes.key]),
           ];
 
       let loaded = 0;
@@ -298,12 +354,13 @@
 
       layers.forEach((src, i) => {
         const img = new Image();
+        img.crossOrigin = "anonymous";
         img.src = src;
         img.onload = () => {
           images[i] = img;
           loaded++;
           if (loaded === layers.length) {
-            images.forEach(image => ctx.drawImage(image, 0, 0, 500, 500));
+            images.forEach((image) => ctx.drawImage(image, 0, 0, 500, 500));
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
@@ -313,6 +370,7 @@
             for (let i = 0; i < chars.length; i++) {
               const char = chars[i];
               const color = rainbowColors[i % rainbowColors.length];
+
               ctx.lineWidth = 6;
               ctx.strokeStyle = 'black';
               ctx.strokeText(char, 250 + offsetX, 475);
@@ -328,6 +386,37 @@
           }
         };
       });
+    }
+
+    // 롤랑 이미지 5개 낙하 이스터에그
+    function triggerFallingRoland() {
+      // 사운드 재생
+      const plopAudio = document.getElementById('plopSound');
+      plopAudio.currentTime = 0;
+      plopAudio.play().catch(() => {});
+
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const img = document.createElement('img');
+          img.src = 'img/roland.png';
+          img.className = 'falling-roland';
+
+          const x = Math.random() * (window.innerWidth - 130);
+          img.style.left = `${x}px`;
+          img.style.top = `-140px`;
+
+          document.body.appendChild(img);
+
+          // 강제 리플로우 (transition 적용 위해)
+          void img.offsetWidth;
+
+          img.style.transform = `translateY(${window.innerHeight + 150}px)`;
+
+          setTimeout(() => {
+            img.remove();
+          }, 2800);
+        }, i * 200);
+      }
     }
 
     window.onload = () => {
